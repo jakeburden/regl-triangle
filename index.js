@@ -18,20 +18,26 @@ var drawTriangle = regl({
   `,
 
   attributes: {
-    position: [
-      [0, 1],
-      [1, 0],
-      [-1, 0]
-    ]
+    position: function (context) {
+      return [
+        [Math.cos(context.tick / 100), 1],
+        [Math.sin(context.tick / 100), 0],
+        [-1 * Math.sin(context.tick / 100), 0]
+      ]
+    }
   },
 
   uniforms: {
-    color: [
-      0, 1, 1, 1
-    ]
+    color: function (context, props) {
+      return props.color
+    }
   },
 
   count: 3
 })
 
-drawTriangle()
+regl.frame(function () {
+  drawTriangle({
+    color: [0, 1, 1, 1]
+  })
+})
