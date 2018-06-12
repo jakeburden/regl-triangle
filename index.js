@@ -3,17 +3,22 @@ var regl = require('regl')()
 var drawTriangle = regl({
   vert: `
     precision mediump float;
+    uniform vec2 translate;
+    uniform vec2 scale;
     attribute vec2 position;
+    attribute vec3 color;
+    varying vec3 fcolor;
     void main () {
-      gl_Position = vec4(position, 0, 1);
+      fcolor = color;
+      gl_Position = vec4(scale * position + translate, 0, 1);
     }
   `,
 
   frag: `
     precision mediump float;
-    uniform vec4 color;
+    varying vec3 fcolor;
     void main () {
-      gl_FragColor = color;
+      gl_FragColor = vec4(sqrt(fcolor), 1);
     }
   `,
 
@@ -21,15 +26,31 @@ var drawTriangle = regl({
     position: function (context) {
       return [
         [Math.cos(context.tick / 100), 1],
-        [Math.sin(context.tick / 100), 0],
-        [-1 * Math.sin(context.tick / 100), 0]
+        [1, 0],
+        [-1, 0]
       ]
-    }
+    },
+
+    color: [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1]
+    ]
   },
 
   uniforms: {
-    color: function (context, props) {
-      return props.color
+    translate: function (context, props) {
+      return [
+        0.25 * Math.cos(0.02 * context.tick),
+        0.25 * Math.sin(0.015 * context.tick)
+      ]
+    },
+
+    scale: function (context, props) {
+      return [
+        0.03 * Math.cos(0.08 * context.tick) + props.scale,
+        props.scale
+      ]
     }
   },
 
@@ -37,7 +58,11 @@ var drawTriangle = regl({
 })
 
 regl.frame(function () {
+  regl.clear({
+    color: [0, 0, 0, 1]
+  })
+
   drawTriangle({
-    color: [0, 1, 1, 1]
+    scale: 0.25
   })
 })
